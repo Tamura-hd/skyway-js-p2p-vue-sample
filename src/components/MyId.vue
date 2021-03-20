@@ -1,10 +1,17 @@
 <template>
 <v-dialog v-model="dialog">
   <v-card>
-    <v-card-text>
-      My ID - 0123456789
-    </v-card-text>
+    <v-card-title>
+      My ID
+    </v-card-title>
+    <v-text-field
+      :value="myId"
+      readonly
+      class="text-sm-h6 text-field-center pa-2"
+    >
+    </v-text-field>
     <v-card-actions>
+      <v-spacer></v-spacer>
       <v-btn @click="dialog=false">
         Close
       </v-btn>
@@ -16,7 +23,9 @@
 <script>
 export default {
   name: 'MyId',
-
+  props: {
+    myId: String,
+  },
   data () {
     return {
       dialog: false,
@@ -28,12 +37,16 @@ export default {
 <style scoped>
 @media (max-width: 540px) {
   ::v-deep .v-dialog.v-dialog--active {
-    width: 80%;
+    width: 60%;
   }
 }
 @media (min-width: 540px) {
   ::v-deep .v-dialog.v-dialog--active {
-    width: 50%;
+    width: 40%;
   }
+}
+
+::v-deep .text-field-center input {
+  text-align: center;
 }
 </style>

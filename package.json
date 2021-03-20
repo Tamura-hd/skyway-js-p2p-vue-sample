@@ -15,6 +15,7 @@
     "@fortawesome/vue-fontawesome": "^2.0.0",
     "@mdi/font": "^5.9.55",
     "core-js": "^3.6.5",
+    "skyway-js": "^4.4.0",
     "vue": "^2.6.11",
     "vue-i18n": "^8.24.1",
     "vue-router": "^3.4.9",

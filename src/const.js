@@ -5,5 +5,6 @@ export default {
         width: { ideal: 1280 },
         height: { ideal: 720 },
     },
-  }
+  },
+  CODE_TABLE: '0123456789',
 }

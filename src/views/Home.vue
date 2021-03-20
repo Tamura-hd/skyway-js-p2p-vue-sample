@@ -10,6 +10,7 @@
       </v-row>
       <v-row align="center" class="h-20 ma-0">
         <v-col cols="3" class="d-flex justify-center">
+          <MyId ref="myIdDialog" :myId="peerId" />
           <v-btn
             icon
             color="primary"
@@ -20,6 +21,7 @@
           </v-btn>
         </v-col>
         <v-col cols="9" class="d-flex justify-center">
+          <MakeCall ref="makeCallDialog" />
           <v-btn
             class="ma-1"
             icon
@@ -49,14 +51,12 @@
         </v-col>
       </v-row>
     </v-card>
-
-    <MyId ref="myIdDialog" />
-    <MakeCall ref="makeCallDialog" />
   </v-container>
 </div>
 </template>
 
 <script>
+import Peer from 'skyway-js'
 import Consts from '../const'
 import MyId from '../components/MyId.vue'
 import MakeCall from '../components/MakeCall.vue'
@@ -70,6 +70,8 @@ export default {
 
   data () {
     return {
+      peer: undefined,
+      peerId: '',
       theirVideo: undefined,
       myVideo: undefined,
       muted: false,
@@ -87,6 +89,21 @@ export default {
         this.myVideo = stream;
         // 着信時に相手にカメラ映像を返せるように、グローバル変数に保存しておく(Save it in a global variable.)
         // localStream = stream;
+
+        // Peer ID を生成(Generate peer ID)
+        let generateId = ''
+        for (var i = 0, k = Consts.CODE_TABLE.length; i < 10; i++) {
+          generateId += Consts.CODE_TABLE.charAt(Math.floor(k * Math.random()));
+        }
+
+        this.peer = new Peer(generateId, {
+          key: process.env.VUE_APP_SKYWAY_API_KEY,
+          debug: 3
+        });
+
+        this.peer.on('open', () => {
+          this.peerId = this.peer.id;
+        });
       }).catch( error => {
         console.error('mediaDevice.getUserMedia() error:', error);
         return;
