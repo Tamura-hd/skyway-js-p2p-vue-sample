@@ -7,7 +7,7 @@
     <v-toolbar dark color="primary">
     </v-toolbar>
     <v-card-title>
-      <span class="headline">0123456789</span>
+      <span class="headline">{{ theirId }}</span>
     </v-card-title>
     <v-card-text>
       <p>{{ $t("index.calling") }}</p>
@@ -29,6 +29,11 @@
 
 <script>
 export default {
+  name: 'MakeCalling',
+  props: {
+    theirId: String,
+  },
+
   data () {
     return {
       dialog: false,
