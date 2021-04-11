@@ -26,6 +26,7 @@ export default {
   props: {
     myId: String,
   },
+
   data () {
     return {
       dialog: false,
