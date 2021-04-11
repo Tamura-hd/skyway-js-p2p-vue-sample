@@ -15,7 +15,7 @@
     </v-toolbar>
     <v-card-text class="pb-1">
       <v-text-field
-        v-model="theirId"
+        v-model="friendId"
         :label="$t('message.inputTheirId')"
       >
       </v-text-field>
@@ -24,17 +24,17 @@
       <v-row class="numericpad-area">
         <v-spacer></v-spacer>
         <v-col class="d-flex justify-center">
-          <v-btn fab dark color="primary" @click="theirId+=1">
+          <v-btn fab dark color="primary" @click="friendId+='1'">
             <h2>1</h2>
           </v-btn>
         </v-col>
         <v-col class="d-flex justify-center">
-          <v-btn fab dark color="primary" @click="theirId+=2">
+          <v-btn fab dark color="primary" @click="friendId+='2'">
             <h2>2</h2>
           </v-btn>
         </v-col>
         <v-col class="d-flex justify-center">
-          <v-btn fab dark color="primary" @click="theirId+=3">
+          <v-btn fab dark color="primary" @click="friendId+='3'">
             <h2>3</h2>
           </v-btn>
         </v-col>
@@ -43,17 +43,17 @@
       <v-row class="numericpad-area">
         <v-spacer></v-spacer>
         <v-col class="d-flex justify-center">
-          <v-btn fab dark color="primary" @click="theirId+=4">
+          <v-btn fab dark color="primary" @click="friendId+='4'">
             <h2>4</h2>
           </v-btn>
         </v-col>
         <v-col class="d-flex justify-center">
-          <v-btn fab dark color="primary" @click="theirId+=5">
+          <v-btn fab dark color="primary" @click="friendId+='5'">
             <h2>5</h2>
           </v-btn>
         </v-col>
         <v-col class="d-flex justify-center">
-          <v-btn fab dark color="primary" @click="theirId+=6">
+          <v-btn fab dark color="primary" @click="friendId+='6'">
             <h2>6</h2>
           </v-btn>
         </v-col>
@@ -62,17 +62,17 @@
       <v-row class="numericpad-area">
         <v-spacer></v-spacer>
         <v-col class="d-flex justify-center">
-          <v-btn fab dark color="primary" @click="theirId+=7">
+          <v-btn fab dark color="primary" @click="friendId+='7'">
             <h2>7</h2>
           </v-btn>
         </v-col>
         <v-col class="d-flex justify-center">
-          <v-btn fab dark color="primary" @click="theirId+=8">
+          <v-btn fab dark color="primary" @click="friendId+='8'">
             <h2>8</h2>
           </v-btn>
         </v-col>
         <v-col class="d-flex justify-center">
-          <v-btn fab dark color="primary" @click="theirId+=9">
+          <v-btn fab dark color="primary" @click="friendId+='9'">
             <h2>9</h2>
           </v-btn>
         </v-col>
@@ -80,7 +80,7 @@
       </v-row>
       <v-row class="numericpad-area">
         <v-col class="d-flex justify-center">
-          <v-btn fab dark color="primary" @click="theirId+=0">
+          <v-btn fab dark color="primary" @click="friendId+='0'">
             <h2>0</h2>
           </v-btn>
         </v-col>
@@ -92,12 +92,12 @@
         <v-col class="d-flex justify-center">
         </v-col>
         <v-col class="d-flex justify-center">
-          <MakeCalling ref="makeCallingDialog" :theirId="theirId" />
+          <MakeCalling ref="makeCallingDialog" :friendId="friendId" />
           <v-btn
             icon
             large
             color="green"
-            @click="showMakeCallingDialog"
+            @click="makeCalling"
           >
             <v-icon large>
               mdi-phone
@@ -123,6 +123,7 @@
 </template>
 
 <script>
+import { mapActions } from 'vuex'
 import MakeCalling from '../components/MakeCalling.vue'
 
 export default {
@@ -134,18 +135,34 @@ export default {
   data () {
     return {
       dialog: false,
-      theirId: '',
+    }
+  },
+
+  computed: {
+    friendId: {
+      get () {
+        return this.$store.getters['skyway/friendId'];
+      },
+      set (value) {
+        this.$store.commit('skyway/setFriendId', value);
+      }
     }
   },
 
   methods: {
-    showMakeCallingDialog() {
+    ...mapActions('skyway', [
+      'connect'
+    ]),
+    makeCalling() {
       this.dialog = false;
       this.$refs.makeCallingDialog.dialog = true;
+
+      // データチャネル接続(Connect to data channel)
+      this.connect();
     },
     sliceInputId() {
-      let result = this.theirId.slice(0, -1);
-      this.theirId = result;
+      let result = this.friendId.slice(0, -1);
+      this.friendId = result;
     }
   }
 }

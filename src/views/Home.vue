@@ -2,7 +2,7 @@
 <div class="home">
   <v-container fluid>
     <v-card color="blue-grey lighten-3">
-      <video id="theirVideo" :srcObject.prop="theirVideo" autoplay :muted="muted" playsinline></video>
+      <video id="friendVideo" :srcObject.prop="friendVideo" autoplay :muted="muted" playsinline></video>
       <v-row class="h-80 ma-0">
         <v-col>
           <video id="myVideo" :srcObject.prop="myVideo" autoplay muted playsinline></video>
@@ -26,15 +26,9 @@
             class="ma-1"
             icon
             color="green"
-            @click="showMakeCallDialog">
-            <v-icon large>
-              mdi-phone
-            </v-icon>
-          </v-btn>
-          <v-btn
-            class="ma-1"
-            icon
-            color="red">
+            :disabled="makeCallDisabled"
+            @click="showMakeCallDialog"
+          >
             <v-icon large>
               mdi-phone
             </v-icon>
@@ -43,7 +37,18 @@
             class="ma-1"
             icon
             color="red"
-            @click="mute">
+            @click="shutOffCall"
+          >
+            <v-icon large>
+              mdi-phone
+            </v-icon>
+          </v-btn>
+          <v-btn
+            class="ma-1"
+            icon
+            color="red"
+            @click="mute"
+          >
             <v-icon large>
               {{ volumeIconName }}
             </v-icon>
@@ -52,73 +57,102 @@
       </v-row>
     </v-card>
   </v-container>
+
+<IncomingCall ref="incomingCallDialog" />
 </div>
 </template>
 
 <script>
-import Peer from 'skyway-js'
+import { mapActions } from 'vuex'
 import Consts from '../const'
 import MyId from '../components/MyId.vue'
 import MakeCall from '../components/MakeCall.vue'
+import IncomingCall from '../components/IncomingCall.vue'
 
 export default {
   name: 'Home',
   components: {
     MyId,
-    MakeCall
+    MakeCall,
+    IncomingCall
   },
 
   data () {
     return {
-      peer: undefined,
-      peerId: '',
-      theirVideo: undefined,
-      myVideo: undefined,
       muted: false,
       volumeIconName: 'mdi-volume-high',
     }
   },
 
   mounted: function() {
-    /**
-     * カメラ映像取得
-     */
+    // カメラ映像取得
     navigator.mediaDevices.getUserMedia(Consts.MEDIA_STREAM_CONSTRAINTS)
-      .then( stream => {
-        // 成功時にvideo要素にカメラ映像をセットして再生
+      .then(async (stream) => {
         this.myVideo = stream;
-        // 着信時に相手にカメラ映像を返せるように、グローバル変数に保存しておく(Save it in a global variable.)
-        // localStream = stream;
 
-        // Peer ID を生成(Generate peer ID)
-        let generateId = ''
+        // Generate peer ID
+        let generateId = '';
         for (var i = 0, k = Consts.CODE_TABLE.length; i < 10; i++) {
           generateId += Consts.CODE_TABLE.charAt(Math.floor(k * Math.random()));
         }
 
-        this.peer = new Peer(generateId, {
-          key: process.env.VUE_APP_SKYWAY_API_KEY,
-          debug: 3
-        });
-
-        this.peer.on('open', () => {
-          this.peerId = this.peer.id;
-        });
-      }).catch( error => {
+        // Create a new Peer instance.
+        await this.initPeer(generateId);
+      }).catch(error => {
         console.error('mediaDevice.getUserMedia() error:', error);
         return;
       });
   },
 
+  computed: {
+    peerId: {
+      get () {
+        return this.$store.getters['skyway/peerId'];
+      },
+      set (value) {
+        this.$store.commit('skyway/setPeerId', value);
+      }
+    },
+    myVideo: {
+      get () {
+        return this.$store.getters['skyway/mediaStream'];
+      },
+      set (value) {
+        this.$store.commit('skyway/setMediaStream', value);
+      }
+    },
+    friendVideo: {
+      get () {
+        return this.$store.getters['skyway/friendMediaStream'];
+      },
+      set (value) {
+        this.$store.commit('skyway/setFriendMediaStream', value);
+      }
+    },
+    makeCallDisabled: {
+      get () {
+        return this.$store.getters['makeCallDisabled'];
+      },
+      set (value) {
+        this.$store.commit('setMakeCallDisabled', value);
+      }
+    }
+  },
+
   methods: {
+    ...mapActions('skyway', [
+      'initPeer',
+      'closeMediaConnection'
+    ]),
     showMyIdDialog() {
       this.$refs.myIdDialog.dialog = true;
     },
     showMakeCallDialog() {
+      this.$store.dispatch('skyway/resetFriendId');
       this.$refs.makeCallDialog.dialog = true;
     },
     shutOffCall() {
-
+      this.closeMediaConnection();
     },
     mute() {
       if (this.muted) {
@@ -126,7 +160,7 @@ export default {
       } else {
         this.volumeIconName = 'mdi-volume-off';
       }
-      this.muted = !this.muted
+      this.muted = !this.muted;
     }
   }
 }
@@ -143,7 +177,7 @@ export default {
   height: 100%;
 }
 
-#theirVideo {
+#friendVideo {
   width: 100%;
   height: 100%;
   position: absolute;

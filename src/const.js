@@ -1,4 +1,4 @@
-export default {
+export default Object.freeze({
   MEDIA_STREAM_CONSTRAINTS: {
     audio: true,
     video: {
@@ -7,4 +7,4 @@ export default {
     },
   },
   CODE_TABLE: '0123456789',
-}
+});

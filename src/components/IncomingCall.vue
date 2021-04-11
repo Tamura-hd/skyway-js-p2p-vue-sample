@@ -10,9 +10,19 @@
       <span class="headline">{{ friendId }}</span>
     </v-card-title>
     <v-card-text>
-      <p>{{ $t("index.calling") }}</p>
+      <p>{{ $t("index.incoming") }}</p>
     </v-card-text>
     <v-card-actions>
+      <v-btn
+        class="ma-1"
+        icon
+        color="green"
+        @click="acceptCall"
+      >
+        <v-icon large>
+          mdi-phone
+        </v-icon>
+      </v-btn>
       <v-btn
         class="ma-1"
         icon
@@ -32,11 +42,6 @@
 import { mapActions } from 'vuex'
 
 export default {
-  name: 'MakeCalling',
-  props: {
-    friendId: String,
-  },
-
   data () {
     return {
     }
@@ -45,20 +50,30 @@ export default {
   computed: {
     dialog: {
       get () {
-        return this.$store.getters['makeCallingModalShow'];
+        return this.$store.getters['incomingCallModalShow'];
       },
       set (value) {
-        this.$store.commit('setMakeCallingModalShow', value, { root: true });
+        this.$store.commit('setIncomingCallModalShow', value, { root: true });
+      }
+    },
+    friendId: {
+      get () {
+        return this.$store.getters['skyway/friendId'];
       }
     }
   },
 
   methods: {
     ...mapActions('skyway', [
-      'closeMediaConnection'
+      'replyConnection',
+      'rejectDataConnection'
     ]),
+    async acceptCall() {
+      await this.replyConnection();
+      this.dialog = false;
+    },
     async shutOffCall() {
-      await this.closeMediaConnection();
+      await this.rejectDataConnection();
       this.dialog = false;
     }
   }
